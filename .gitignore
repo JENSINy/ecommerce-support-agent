@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and API keys
+.env
+backend/.env
+frontend/.env
+
+# SQLite local databases
+backend/ecommerce.db
+backend/ecommerce_test.db
+*.db-journal
+
+# Frontend dependencies and build files
+frontend/node_modules/
+frontend/dist/
+
+# IDE files
+.idea/
+.vscode/
