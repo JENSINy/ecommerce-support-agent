@@ -63,10 +63,12 @@ ecommerce-support-agent/
 │   ├── .env
 │   └── package.json
 └── README.md
+```
 
 
-核心工具
-工具	功能
+
+## 核心工具
+### 工具	功能
 get_order(order_id)	查询订单商品、金额和订单状态
 get_logistics(order_id)	查询快递公司、运单号和物流进度
 search_faq(question)	查询商品参数、兼容性、保修与退换货规则
@@ -75,8 +77,8 @@ request_refund(order_id, amount, reason)	创建待人工审批的退款申请
 issue_refund(order_id, amount)	仅在人工批准后由后端模拟执行退款
 
 
-核心业务流程
-订单、物流与 FAQ 查询
+## 核心业务流程
+### 订单、物流与 FAQ 查询
 用户输入自然语言
 -> Agent 识别用户意图
 -> 调用订单、物流或 FAQ 工具
@@ -84,16 +86,16 @@ issue_refund(order_id, amount)	仅在人工批准后由后端模拟执行退款
 -> 整理为自然语言回复
 -> 保存工具调用日志
 
-退货审核
-用户申请退货
+## 退货审核
+### 用户申请退货
 -> Agent 收集订单号和退货原因
 -> 创建 pending_review 状态的退货申请
 -> 前端退货审核中心展示申请
 -> 人工批准或拒绝
 -> 保存人工审核日志
 
-退款人工审批
-用户申请退款
+## 退款人工审批
+### 用户申请退款
 -> Agent 收集订单号、退款金额和退款原因
 -> Agent 创建 pending_approval 状态的退款申请
 -> 前端退款审批中心展示申请
@@ -102,19 +104,20 @@ issue_refund(order_id, amount)	仅在人工批准后由后端模拟执行退款
 -> 订单状态更新为 refunded
 -> 保存人工审批操作日志
 
-数据表
-数据表	用途
-orders	模拟订单数据
-logistics	模拟物流数据
-faqs	商品常见问题知识库
-conversations	会话记录
-messages	用户与 Agent 的聊天消息
-tool_logs	Agent 工具调用和人工审核日志
-return_requests	退货申请记录
-refund_requests	退款申请记录
+## 数据表
+| 数据表              | 用途              |
+|------------------|-----------------|
+| orders           | 模拟订单数据          |
+| logistics        | 模拟物流数据          |
+| faqs             | 商品常见问题知识库       |
+| conversations	   | 会话记录            |
+| messages	        | 用户与 Agent 的聊天消息 |
+| tool_logs	Agent  | 工具调用和人工审核日志     |
+| return_requests  | 	退货申请记录         |
+| refund_requests  | 	退款申请记录         |
 
-本地运行
-1. 后端配置
+## 本地运行
+### 1. 后端配置
 
 进入后端目录：
 
@@ -150,7 +153,7 @@ python -m uvicorn main:app --reload
 
 http://127.0.0.1:8000/docs
 
-2. 前端配置
+### 2. 前端配置
 
 打开新的终端，进入前端目录：
 
@@ -176,38 +179,38 @@ npm.cmd run dev
 
 http://localhost:5173
 
-演示测试用例
-查询订单
+## 演示测试用例
+### 查询订单
 查询订单 ORD004
 
 
 预期：Agent 调用 get_order，返回订单状态 paid。
 
-查询物流
+### 查询物流
 查询 ORD002 的物流
 
 
 预期：Agent 调用 get_logistics，返回中通快递和“已揽收”状态。
 
-查询 FAQ
+### 查询 FAQ
 蓝牙静音鼠标怎么充电？
 
 
 预期：Agent 调用 search_faq，回答 Type-C 充电和续航信息。
 
-创建退货申请
+### 创建退货申请
 我要退货，订单号 ORD003，原因是不想要了。
 
 
 预期：Agent 调用 create_return_request，前端退货审核中心出现待审核记录。
 
-创建退款申请
+### 创建退款申请
 我要申请退款，不是退货。订单号 ORD002，退款金额 129 元，原因是鼠标无法使用。
 
 
 预期：Agent 调用 request_refund，前端退款审批中心出现待审批记录。
 
-自动化测试
+## 自动化测试
 
 在 backend 目录运行：
 
@@ -230,7 +233,7 @@ python -m pytest -q
 
 拒绝退货时审核原因必填校验
 
-安全设计
+### 安全设计
 
 DEEPSEEK_API_KEY 仅保存于后端 .env 文件，不提交到 Git。
 
@@ -242,7 +245,7 @@ Agent 只能创建 pending_approval 状态的退款申请。
 
 Agent 工具调用和人工审批操作均保存到 tool_logs，支持审计和问题追踪。
 
-后续优化
+### 后续优化
 
 使用 PostgreSQL 替换 SQLite
 
