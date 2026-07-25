@@ -68,13 +68,14 @@ ecommerce-support-agent/
 
 
 ## 核心工具
-### 工具	功能
-get_order(order_id)	查询订单商品、金额和订单状态
-get_logistics(order_id)	查询快递公司、运单号和物流进度
-search_faq(question)	查询商品参数、兼容性、保修与退换货规则
-create_return_request(order_id, reason)	创建待人工审核的退货申请
-request_refund(order_id, amount, reason)	创建待人工审批的退款申请
-issue_refund(order_id, amount)	仅在人工批准后由后端模拟执行退款
+| 工具    | 功能  |
+|-------|-----|
+| get_order(order_id)	 | 查询订单商品、金额和订单状态 |
+| get_logistics(order_id) |	查询快递公司、运单号和物流进度 |
+| search_faq(question)	| 查询商品参数、兼容性、保修与退换货规则      |        
+| create_return_request(order_id, reason)	| 创建待人工审核的退货申请  |
+| request_refund(order_id, amount, reason)	| 创建待人工审批的退款申请 |
+| issue_refund(order_id, amount)	| 仅在人工批准后由后端模拟执行退款  |      
 
 
 ## 核心业务流程
@@ -120,34 +121,34 @@ issue_refund(order_id, amount)	仅在人工批准后由后端模拟执行退款
 ### 1. 后端配置
 
 进入后端目录：
-
+```text
 cd backend
-
+```
 
 安装 Python 依赖：
-
+```text
 python -m pip install fastapi uvicorn sqlalchemy openai-agents openai python-dotenv pytest httpx
-
+```
 
 创建 backend/.env 文件：
-
+```text
 DEEPSEEK_API_KEY=你的DeepSeek_API_Key
-
+```
 
 初始化数据库和模拟数据：
-
+```text
 python init_db.py
-
+```
 
 如果已创建过 return_requests 表，运行迁移脚本：
-
+```text
 python migrate_return_requests.py
-
+```
 
 启动后端：
-
+```text
 python -m uvicorn main:app --reload
-
+```
 
 打开后端 API 文档：
 
@@ -156,29 +157,29 @@ http://127.0.0.1:8000/docs
 ### 2. 前端配置
 
 打开新的终端，进入前端目录：
-
+```text
 cd frontend
-
+```
 
 安装依赖：
-
+```text
 npm.cmd install
-
+```
 
 创建 frontend/.env 文件：
-
+```text
 VITE_API_BASE_URL=http://127.0.0.1:8000
-
+```
 
 启动前端：
-
+```text
 npm.cmd run dev
-
+```
 
 浏览器打开：
-
+```text
 http://localhost:5173
-
+```
 ## 演示测试用例
 ### 查询订单
 查询订单 ORD004
@@ -213,9 +214,9 @@ http://localhost:5173
 ## 自动化测试
 
 在 backend 目录运行：
-
+```text
 python -m pytest -q
-
+```
 
 测试使用独立的 ecommerce_test.db，不会影响演示数据库 ecommerce.db。
 
