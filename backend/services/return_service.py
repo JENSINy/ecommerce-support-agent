@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from models import ReturnRequest, ToolLog
+from statuses import ReturnStatus, ToolLogStatus
 
 
 def get_return_requests(
@@ -52,7 +53,7 @@ def approve_return_request(
             detail="退货申请不存在",
         )
 
-    if return_request.status != "pending_review":
+    if return_request.status != ReturnStatus.PENDING_REVIEW:
         raise HTTPException(
             status_code=400,
             detail="该退货申请已处理，不能重复批准",
@@ -61,7 +62,7 @@ def approve_return_request(
     started_at = time.perf_counter()
 
     try:
-        return_request.status = "approved"
+        return_request.status = ReturnStatus.APPROVED
         return_request.reviewed_by = "admin"
         return_request.reviewed_at = datetime.now()
         return_request.review_note = "人工审核通过，可按退货指引寄回商品。"
@@ -92,12 +93,13 @@ def approve_return_request(
                     },
                     ensure_ascii=False,
                 ),
-                status="success",
+                status=ToolLogStatus.SUCCESS,
                 duration_ms=duration_ms,
                 error_message=None,
             )
         )
 
+        # 审批状态和日志一起提交。
         db.commit()
         db.refresh(return_request)
 
@@ -107,8 +109,10 @@ def approve_return_request(
             "return_no": return_request.return_no,
             "status": return_request.status,
         }
+
     except Exception as error:
         db.rollback()
+
         raise HTTPException(
             status_code=500,
             detail=f"批准退货申请失败：{error}",
@@ -131,7 +135,7 @@ def reject_return_request(
             detail="退货申请不存在",
         )
 
-    if return_request.status != "pending_review":
+    if return_request.status != ReturnStatus.PENDING_REVIEW:
         raise HTTPException(
             status_code=400,
             detail="该退货申请已处理，不能重复拒绝",
@@ -148,7 +152,7 @@ def reject_return_request(
     started_at = time.perf_counter()
 
     try:
-        return_request.status = "rejected"
+        return_request.status = ReturnStatus.REJECTED
         return_request.reviewed_by = "admin"
         return_request.reviewed_at = datetime.now()
         return_request.review_note = normalized_note
@@ -179,12 +183,13 @@ def reject_return_request(
                     },
                     ensure_ascii=False,
                 ),
-                status="success",
+                status=ToolLogStatus.SUCCESS,
                 duration_ms=duration_ms,
                 error_message=None,
             )
         )
 
+        # 拒绝状态和日志一起提交。
         db.commit()
         db.refresh(return_request)
 
@@ -194,8 +199,10 @@ def reject_return_request(
             "return_no": return_request.return_no,
             "status": return_request.status,
         }
+
     except Exception as error:
         db.rollback()
+
         raise HTTPException(
             status_code=500,
             detail=f"拒绝退货申请失败：{error}",

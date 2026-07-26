@@ -1,6 +1,12 @@
 # 电商售后 Agent 工作台
 
-一个面向电商售后场景的智能客服工作台。用户可通过自然语言查询订单、物流、商品 FAQ，并提交退货或退款申请；退款等敏感操作必须经过人工审批后才会执行。
+一个面向电商售后场景的智能客服工作台。
+
+用户可以通过自然语言查询订单、物流和商品 FAQ，也可以提交退货或退款申请。退款等敏感操作不会由 Agent 直接执行，而是进入人工审批流程。
+
+项目采用 FastAPI + React + OpenAI Agents SDK + DeepSeek API，并使用 SQLite 保存业务数据、会话记录和工具调用日志。
+
+---
 
 ## 项目功能
 
@@ -11,22 +17,27 @@
 - 查询商品常见问题
 - 创建退货申请
 - 创建退款申请
-- 支持多轮会话：用户先说明需求，后续补充订单号、金额或原因后可继续处理
+- 支持多轮会话
+- 根据上下文继续补充订单号、金额或申请原因
 
 ### 人工审核
 
 - 退货申请由人工审核通过或拒绝
 - 退款申请由人工批准或拒绝
-- Agent 只能创建待审批退款申请，不能直接执行退款
-- 人工批准退款后，系统模拟执行退款并更新订单状态
+- Agent 只能创建待审批退款申请
+- Agent 无权直接执行退款
+- 人工批准退款后，后端模拟执行退款并更新订单状态
 
 ### 日志与数据
 
-- SQLite 持久化保存订单、物流、FAQ、聊天消息和售后申请
+- SQLite 保存订单、物流、FAQ 和售后申请
+- 保存用户与 Agent 的聊天记录
 - 保存 Agent 工具调用日志
-- 日志包含工具名称、调用原因、输入参数、执行结果、耗时和失败信息
-- 通过 `session_id` 恢复历史会话记录
-- 保存人工审批操作日志，便于审计与排查问题
+- 保存人工退款和退货审核日志
+- 日志包含调用原因、输入参数、执行结果、耗时和异常信息
+- 支持通过 `session_id` 恢复历史会话
+
+---
 
 ## 技术栈
 
@@ -38,225 +49,481 @@
 | 大模型 | DeepSeek API |
 | 数据库 | SQLite |
 | ORM | SQLAlchemy 2.0 |
-| 测试 | pytest、FastAPI TestClient |
+| 后端测试 | pytest、FastAPI TestClient |
+| Python 代码检查 | Ruff |
+| 前端代码检查 | Oxlint |
+
+---
 
 ## 项目结构
 
 ```text
 ecommerce-support-agent/
 ├── backend/
+│   ├── agent/
+│   │   ├── tools/
+│   │   │   ├── __init__.py
+│   │   │   ├── faq.py
+│   │   │   ├── logistics.py
+│   │   │   ├── orders.py
+│   │   │   ├── refunds.py
+│   │   │   └── returns.py
+│   │   ├── __init__.py
+│   │   ├── client.py
+│   │   ├── context.py
+│   │   ├── logging.py
+│   │   ├── prompts.py
+│   │   └── service.py
+│   │
+│   ├── routers/
+│   │   ├── __init__.py
+│   │   ├── chat.py
+│   │   ├── conversations.py
+│   │   ├── orders.py
+│   │   ├── refunds.py
+│   │   ├── returns.py
+│   │   └── tool_logs.py
+│   │
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── conversation_service.py
+│   │   ├── order_service.py
+│   │   ├── refund_service.py
+│   │   ├── return_service.py
+│   │   └── tool_log_service.py
+│   │
+│   ├── tests/
+│   │   ├── conftest.py
+│   │   ├── test_conversations.py
+│   │   ├── test_orders.py
+│   │   ├── test_refunds.py
+│   │   └── test_returns.py
+│   │
 │   ├── agent_service.py
 │   ├── database.py
+│   ├── dependencies.py
 │   ├── init_db.py
 │   ├── main.py
-│   ├── migrate_return_requests.py
 │   ├── models.py
-│   ├── test_api.py
-│   ├── ecommerce.db
-│   ├── .env
-│   └── .gitignore
+│   ├── schemas.py
+│   ├── statuses.py
+│   └── pyproject.toml
+│
 ├── frontend/
 │   ├── src/
+│   │   ├── api/
+│   │   │   ├── chatApi.js
+│   │   │   ├── client.js
+│   │   │   ├── refundApi.js
+│   │   │   ├── returnApi.js
+│   │   │   └── toolLogApi.js
+│   │   │
+│   │   ├── components/
+│   │   │   ├── approvals/
+│   │   │   ├── chat/
+│   │   │   ├── common/
+│   │   │   └── logs/
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useConversation.js
+│   │   │   ├── useRefundRequests.js
+│   │   │   └── useReturnRequests.js
+│   │   │
+│   │   ├── styles/
+│   │   │   ├── approvals.css
+│   │   │   ├── chat.css
+│   │   │   ├── global.css
+│   │   │   ├── layout.css
+│   │   │   ├── logs.css
+│   │   │   ├── responsive.css
+│   │   │   └── tokens.css
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── formatters.js
+│   │   │   └── status.js
+│   │   │
 │   │   ├── App.jsx
-│   │   ├── index.css
 │   │   └── main.jsx
-│   ├── .env
+│   │
 │   └── package.json
+│
+├── .gitignore
 └── README.md
 ```
 
+## 后端结构说明
 
+后端按照职责拆分，避免路由、业务逻辑、数据库和 Agent 代码混在一起。
 
-## 核心工具
-### 工具	功能
-get_order(order_id)	查询订单商品、金额和订单状态
-get_logistics(order_id)	查询快递公司、运单号和物流进度
-search_faq(question)	查询商品参数、兼容性、保修与退换货规则
-create_return_request(order_id, reason)	创建待人工审核的退货申请
-request_refund(order_id, amount, reason)	创建待人工审批的退款申请
-issue_refund(order_id, amount)	仅在人工批准后由后端模拟执行退款
+### Router
 
+`routers/` 负责：
+
+- 接收 HTTP 请求
+- 获取参数
+- 调用 Service
+- 返回响应
+
+### Service
+
+`services/` 负责：
+
+- 查询退款、退货申请
+- 修改申请和订单状态
+- 创建人工审批日志
+- 控制数据库事务
+
+### Model / Schema / Status
+
+- `models.py`：定义 SQLAlchemy 数据模型
+- `schemas.py`：定义 API 请求和响应结构
+- `statuses.py`：集中管理业务状态
+
+主要状态：
+
+```text
+退款：pending_approval / approved / rejected
+退货：pending_review / approved / rejected
+订单：refunded
+日志：success / failed / not_found
+```
+
+---
+
+## Agent 结构
+
+Agent 代码位于：
+
+```text
+backend/agent/
+```
+
+主要结构：
+
+```text
+agent/
+├── tools/
+├── client.py
+├── context.py
+├── logging.py
+├── prompts.py
+└── service.py
+```
+
+主要职责：
+
+- `client.py`：创建 DeepSeek 客户端
+- `context.py`：保存会话上下文
+- `prompts.py`：保存 Agent 提示词
+- `service.py`：创建客服 Agent
+- `logging.py`：保存工具调用日志
+- `tools/`：订单、物流、FAQ、退款、退货工具
+
+### Agent 工具
+
+| 工具 | 功能 |
+| --- | --- |
+| `get_order` | 查询订单 |
+| `get_logistics` | 查询物流 |
+| `search_faq` | 查询 FAQ |
+| `create_return_request` | 创建退货申请 |
+| `request_refund` | 创建退款申请 |
+
+Agent 只能创建退款申请，不能直接执行退款。
+
+---
 
 ## 核心业务流程
-### 订单、物流与 FAQ 查询
-用户输入自然语言
--> Agent 识别用户意图
--> 调用订单、物流或 FAQ 工具
--> 查询 SQLite 数据库
--> 整理为自然语言回复
--> 保存工具调用日志
 
-## 退货审核
-### 用户申请退货
--> Agent 收集订单号和退货原因
--> 创建 pending_review 状态的退货申请
--> 前端退货审核中心展示申请
--> 人工批准或拒绝
--> 保存人工审核日志
+### 普通查询
 
-## 退款人工审批
-### 用户申请退款
--> Agent 收集订单号、退款金额和退款原因
--> Agent 创建 pending_approval 状态的退款申请
--> 前端退款审批中心展示申请
--> 人工点击“批准退款”
--> 后端模拟执行 issue_refund
--> 订单状态更新为 refunded
--> 保存人工审批操作日志
+```text
+用户
+ ↓
+Agent
+ ↓
+Tool
+ ↓
+Database
+ ↓
+返回结果
+```
+
+### 退货
+
+```text
+用户申请退货
+ ↓
+Agent 创建 pending_review 申请
+ ↓
+人工批准 / 拒绝
+```
+
+### 退款
+
+```text
+用户申请退款
+ ↓
+Agent 创建 pending_approval 申请
+ ↓
+人工批准 / 拒绝
+ ↓
+批准后订单状态变为 refunded
+```
+
+退款申请、订单状态和审批日志在同一个数据库事务中提交，失败时统一回滚。
+
+---
+
+## 前端结构说明
+
+前端按照：
+
+```text
+Component
+ ↓
+Hook
+ ↓
+API
+ ↓
+FastAPI
+```
+
+进行拆分。
+
+目录：
+
+```text
+src/
+├── api/
+├── components/
+├── hooks/
+├── styles/
+├── utils/
+├── App.jsx
+└── main.jsx
+```
+
+- `api/`：后端接口请求
+- `components/`：页面组件
+- `hooks/`：聊天、退款、退货状态逻辑
+- `styles/`：按模块拆分 CSS
+- `utils/`：时间、状态等工具函数
+
+---
 
 ## 数据表
-| 数据表              | 用途              |
-|------------------|-----------------|
-| orders           | 模拟订单数据          |
-| logistics        | 模拟物流数据          |
-| faqs             | 商品常见问题知识库       |
-| conversations	   | 会话记录            |
-| messages	        | 用户与 Agent 的聊天消息 |
-| tool_logs	Agent  | 工具调用和人工审核日志     |
-| return_requests  | 	退货申请记录         |
-| refund_requests  | 	退款申请记录         |
+
+| 数据表 | 用途 |
+| --- | --- |
+| `orders` | 订单数据 |
+| `logistics` | 物流信息 |
+| `faqs` | FAQ 知识库 |
+| `conversations` | 会话信息 |
+| `messages` | 聊天消息 |
+| `tool_logs` | 工具调用和审批日志 |
+| `refund_requests` | 退款申请 |
+| `return_requests` | 退货申请 |
+
+---
 
 ## 本地运行
-### 1. 后端配置
 
-进入后端目录：
+### 后端
 
+```bash
 cd backend
-
-
-安装 Python 依赖：
-
-python -m pip install fastapi uvicorn sqlalchemy openai-agents openai python-dotenv pytest httpx
-
-
-创建 backend/.env 文件：
-
-DEEPSEEK_API_KEY=你的DeepSeek_API_Key
-
-
-初始化数据库和模拟数据：
-
+python -m pip install fastapi uvicorn sqlalchemy openai-agents openai python-dotenv pytest httpx ruff
 python init_db.py
-
-
-如果已创建过 return_requests 表，运行迁移脚本：
-
-python migrate_return_requests.py
-
-
-启动后端：
-
 python -m uvicorn main:app --reload
+```
 
+配置文件：
 
-打开后端 API 文档：
+```text
+backend/.env
+```
 
+示例：
+
+```env
+DEEPSEEK_API_KEY=your_deepseek_api_key
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-v4-flash
+```
+
+API 文档：
+
+```text
 http://127.0.0.1:8000/docs
+```
 
-### 2. 前端配置
+### 前端
 
-打开新的终端，进入前端目录：
-
+```bash
 cd frontend
+npm install
+npm run dev
+```
 
+默认地址：
 
-安装依赖：
-
-npm.cmd install
-
-
-创建 frontend/.env 文件：
-
-VITE_API_BASE_URL=http://127.0.0.1:8000
-
-
-启动前端：
-
-npm.cmd run dev
-
-
-浏览器打开：
-
+```text
 http://localhost:5173
+```
 
-## 演示测试用例
-### 查询订单
-查询订单 ORD004
+---
 
+## 主要 API
 
-预期：Agent 调用 get_order，返回订单状态 paid。
+```text
+POST /chat
 
-### 查询物流
-查询 ORD002 的物流
+GET  /conversations/{session_id}/messages
+GET  /orders/{order_id}
+GET  /tool-logs
 
+GET  /refund-requests
+POST /refund-requests/{id}/approve
+POST /refund-requests/{id}/reject
 
-预期：Agent 调用 get_logistics，返回中通快递和“已揽收”状态。
+GET  /return-requests
+POST /return-requests/{id}/approve
+POST /return-requests/{id}/reject
+```
 
-### 查询 FAQ
-蓝牙静音鼠标怎么充电？
+---
 
+## 示例
 
-预期：Agent 调用 search_faq，回答 Type-C 充电和续航信息。
+查询订单：
 
-### 创建退货申请
-我要退货，订单号 ORD003，原因是不想要了。
+```text
+帮我查询订单 ORD001
+```
 
+查询物流：
 
-预期：Agent 调用 create_return_request，前端退货审核中心出现待审核记录。
+```text
+帮我查询 ORD001 的物流
+```
 
-### 创建退款申请
-我要申请退款，不是退货。订单号 ORD002，退款金额 129 元，原因是鼠标无法使用。
+创建退款申请：
 
+```text
+我要申请退款，订单号 ORD002，
+退款金额 129 元，
+原因是商品无法正常使用。
+```
 
-预期：Agent 调用 request_refund，前端退款审批中心出现待审批记录。
+创建退货申请：
 
-## 自动化测试
+```text
+我要退货，订单号 ORD003，
+原因是商品不合适。
+```
 
-在 backend 目录运行：
+---
 
-python -m pytest -q
+## 测试与代码检查
 
+### 后端
 
-测试使用独立的 ecommerce_test.db，不会影响演示数据库 ecommerce.db。
+```bash
+python -m ruff format .
+python -m ruff check .
+python -m pytest
+```
 
-当前测试覆盖：
+### 前端
 
-存在订单查询
+```bash
+npm run lint
+npm run build
+```
 
-不存在订单查询
+---
 
-工具日志接口
+## 数据库说明
 
-人工批准退款后订单状态更新
+开发数据库：
 
-人工批准退货后申请状态更新
+```text
+backend/ecommerce.db
+```
 
-拒绝退货时审核原因必填校验
+如果修改了数据库模型，`create_all()` 不会自动修改旧表。
 
-### 安全设计
+开发阶段可以备份后重新初始化：
 
-DEEPSEEK_API_KEY 仅保存于后端 .env 文件，不提交到 Git。
+```powershell
+Copy-Item ecommerce.db ecommerce_backup.db
+Remove-Item ecommerce.db
+python init_db.py
+```
 
-Agent 不具备直接退款权限。
+生产环境建议使用 Alembic 管理数据库迁移。
 
-Agent 只能创建 pending_approval 状态的退款申请。
+---
 
-只有人工在审批中心点击“批准退款”后，后端才执行模拟退款。
+## 安全设计
 
-Agent 工具调用和人工审批操作均保存到 tool_logs，支持审计和问题追踪。
+- DeepSeek API Key 保存在 `.env`
+- `.env` 和本地数据库不提交到 Git
+- Agent 不能直接执行退款
+- 退款必须经过人工审批
+- 退货需要人工审核
+- Agent 工具调用和人工审批都会记录日志
 
-### 后续优化
+---
 
-使用 PostgreSQL 替换 SQLite
+## 项目设计
 
-使用 pgvector 实现 FAQ 向量检索
+后端：
 
-增加用户登录、身份认证和管理员权限控制
+```text
+Router
+ ↓
+Service
+ ↓
+Model
+ ↓
+SQLite
+```
 
-增加订单取消等敏感操作的审批机制
+Agent：
 
-接入真实订单、物流与支付平台
+```text
+Chat
+ ↓
+Agent
+ ↓
+Tool
+ ↓
+Database
+```
 
-使用 Docker 完成容器化部署
+前端：
 
-增加更多自动化测试与接口异常场景测试
+```text
+Component
+ ↓
+Hook
+ ↓
+API
+ ↓
+FastAPI
+```
+
+---
+
+## 后续优化
+
+- PostgreSQL
+- Alembic
+- pgvector FAQ 检索
+- 用户登录和权限控制
+- 接入真实订单、物流和退款平台
+- Docker
+- CI/CD
+- 更多自动化测试

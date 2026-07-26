@@ -1,0 +1,30 @@
+:root {
+  font-family: "Microsoft YaHei", Arial, sans-serif;
+
+  --color-text: #172033;
+  --color-text-secondary: #526076;
+  --color-muted: #79859a;
+
+  --color-background: #f3f6fa;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f8fafc;
+
+  --color-primary: #356ae6;
+  --color-success: #228754;
+  --color-success-text: #176b43;
+  --color-warning-text: #855b14;
+  --color-danger: #a53b32;
+
+  --color-border: #dce3ed;
+  --color-border-light: #e5eaf1;
+
+  --color-success-background: #e8f8ef;
+  --color-warning-background: #fff4d8;
+  --color-danger-background: #fff0ee;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+
+  color: var(--color-text);
+  background: var(--color-background);
+}
