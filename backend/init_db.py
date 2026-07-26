@@ -5,9 +5,7 @@ from models import Base, Faq, Logistics, Order
 
 
 def add_order_if_not_exists(db, order_data: dict) -> None:
-    statement = select(Order).where(
-        Order.order_id == order_data["order_id"]
-    )
+    statement = select(Order).where(Order.order_id == order_data["order_id"])
     existing_order = db.scalars(statement).first()
 
     if existing_order is None:
@@ -31,9 +29,7 @@ def add_logistics_if_not_exists(db, logistics_data: dict) -> None:
 
 
 def add_faq_if_not_exists(db, faq_data: dict) -> None:
-    statement = select(Faq).where(
-        Faq.question == faq_data["question"]
-    )
+    statement = select(Faq).where(Faq.question == faq_data["question"])
     existing_faq = db.scalars(statement).first()
 
     if existing_faq is None:
@@ -110,10 +106,7 @@ def init_database() -> None:
             "company": "顺丰速运",
             "tracking_number": "SF1234567890",
             "status": "运输中",
-            "latest_location": (
-                "包裹已到达上海市浦东新区配送中心，"
-                "预计今天送达。"
-            ),
+            "latest_location": ("包裹已到达上海市浦东新区配送中心，预计今天送达。"),
             "updated_at": "2026-07-21 10:30:00",
         },
         {
@@ -121,10 +114,7 @@ def init_database() -> None:
             "company": "中通快递",
             "tracking_number": "ZT20260721001",
             "status": "已揽收",
-            "latest_location": (
-                "商家已将包裹交给中通快递，"
-                "正在等待转运。"
-            ),
+            "latest_location": ("商家已将包裹交给中通快递，正在等待转运。"),
             "updated_at": "2026-07-21 16:20:00",
         },
         {
@@ -133,8 +123,7 @@ def init_database() -> None:
             "tracking_number": "JD20260718008",
             "status": "已签收",
             "latest_location": (
-                "包裹已由用户本人签收，"
-                "如有问题请在签收后及时申请售后。"
+                "包裹已由用户本人签收，如有问题请在签收后及时申请售后。"
             ),
             "updated_at": "2026-07-19 14:05:00",
         },
@@ -143,10 +132,7 @@ def init_database() -> None:
             "company": "圆通速递",
             "tracking_number": "YT20260722003",
             "status": "运输中",
-            "latest_location": (
-                "包裹已从杭州市转运中心发出，"
-                "正在发往目的地。"
-            ),
+            "latest_location": ("包裹已从杭州市转运中心发出，正在发往目的地。"),
             "updated_at": "2026-07-22 18:40:00",
         },
     ]
@@ -194,8 +180,7 @@ def init_database() -> None:
         {
             "question": "蓝牙静音鼠标支持充电吗？",
             "answer": (
-                "支持。蓝牙静音鼠标使用 Type-C 接口充电，"
-                "充满电后正常使用约 30 天。"
+                "支持。蓝牙静音鼠标使用 Type-C 接口充电，充满电后正常使用约 30 天。"
             ),
             "keywords": "鼠标,充电,Type-C,续航,蓝牙,静音",
             "category": "商品参数",

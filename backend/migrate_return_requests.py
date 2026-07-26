@@ -5,9 +5,7 @@ from database import engine
 
 def column_exists(column_name: str) -> bool:
     with engine.connect() as connection:
-        result = connection.execute(
-            text("PRAGMA table_info(return_requests)")
-        )
+        result = connection.execute(text("PRAGMA table_info(return_requests)"))
 
         columns = result.fetchall()
 
