@@ -1,0 +1,58 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.global-error {
+  max-width: 1400px;
+  margin: 16px auto 0;
+  padding: 10px 14px;
+  color: var(--color-danger);
+  background: var(--color-danger-background);
+  border: 1px solid #ffd6d1;
+  border-radius: var(--radius-sm);
+}
+
+.status {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.status.success,
+.status.approved {
+  color: var(--color-success-text);
+  background: var(--color-success-background);
+}
+
+.status.not_found,
+.status.pending_approval,
+.status.pending_review {
+  color: var(--color-warning-text);
+  background: var(--color-warning-background);
+}
+
+.status.failed,
+.status.rejected {
+  color: var(--color-danger);
+  background: var(--color-danger-background);
+}
